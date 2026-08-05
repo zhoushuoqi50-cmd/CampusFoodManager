@@ -33,5 +33,10 @@
   ✨ AI推荐
 </button>
 
+<button 
+ bindtap="changeFood">
+ 🔄 换一个
+</button>
+
 
 </view>

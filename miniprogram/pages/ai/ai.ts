@@ -1,80 +1,62 @@
 Page({
 
-  data:{
-
-    inputText:"",
-
-    messages:[
+  data: {
+    inputText: "",
+    messages: [
       {
-        role:"ai",
-        content:"👋 今天想吃什么？\n预算、口味、心情都可以告诉我"
+        role: "ai",
+        content: "你好，我是小饭AI 🤖\n今天想吃什么？"
       }
     ]
-
   },
 
 
+  // 输入框
   inputChange(e:any){
 
     this.setData({
-
       inputText:e.detail.value
-
     })
 
   },
 
 
+  // AI推荐按钮
   sendMessage(){
 
+    let foods = [
+      "🍜 麻辣烫 💰15-20元\n推荐理由：适合想吃辣又想快速解决午饭的同学",
+      "🍚 黄焖鸡米饭 💰16元左右\n推荐理由：份量足，适合下午有课",
+      "🥟 饺子套餐 💰12-18元\n推荐理由：清淡耐吃，不容易踩雷",
+      "🍗 鸡排饭 💰15元左右\n推荐理由：蛋白质丰富，吃完比较有满足感",
+      "🍲 牛肉粉 💰18元左右\n推荐理由：天气冷的时候很舒服"
+    ]
 
-    let userText=this.data.inputText
+
+    let index = Math.floor(
+      Math.random() * foods.length
+    )
 
 
-    if(!userText){
-      return
+    let userMessage = {
+      role:"user",
+      content:this.data.inputText || "今天吃什么？"
     }
 
 
-    let aiText=""
-
-
-    if(userText.includes("辣")){
-
-      aiText=
-      "🌶️ 推荐：辣味菜品\n\n💰 预算：15-20元\n\n⭐ 推荐原因：满足你想吃辣的需求"
-
-    }
-
-    else if(userText.includes("便宜") || userText.includes("20")){
-
-      aiText=
-      "🍚 推荐：经济套餐\n\n💰 预算：10-20元\n\n⭐ 推荐原因：性价比高，适合日常吃"
-
-    }
-
-    else{
-
-      aiText=
-      "🍜 推荐：热汤面类\n\n⭐ 推荐原因：简单快速，适合今天不知道吃什么"
-
+    let aiMessage = {
+      role:"ai",
+      content:
+      "✨ 推荐给你：\n\n"
+      +
+      foods[index]
     }
 
 
-    let newMessages=[
-
+    let newMessages = [
       ...this.data.messages,
-
-      {
-        role:"user",
-        content:userText
-      },
-
-      {
-        role:"ai",
-        content:aiText
-      }
-
+      userMessage,
+      aiMessage
     ]
 
 
@@ -86,8 +68,33 @@ Page({
 
     })
 
+  },
+  changeFood(){
 
-  }
-
+    let foods=[
+    "🍜 麻辣烫",
+    "🍚 黄焖鸡米饭",
+    "🍗 鸡排饭",
+    "🥟 饺子套餐"
+    ]
+   
+    let index=Math.floor(
+      Math.random()*foods.length
+    )
+   
+   
+    this.setData({
+   
+    messages:[
+      ...this.data.messages,
+      {
+       role:"ai",
+       content:"🔄 换一个推荐：\n\n"+foods[index]
+      }
+    ]
+   
+    })
+   
+   }
 
 })
