@@ -1,0 +1,19 @@
+<view class="container">
+
+<view class="title">
+  🍜 校园吃饭管家
+</view>
+
+<view class="subtitle">
+  你好，我是小饭 🤖
+</view>
+
+<view class="desc">
+  今天想吃什么？
+</view>
+
+<button>
+  🤖 AI帮我决定
+</button>
+
+</view>

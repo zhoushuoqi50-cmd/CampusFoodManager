@@ -1,0 +1,19 @@
+<view class="container">
+
+<view class="title">
+  🤖 小饭AI推荐
+</view>
+
+<view class="chat">
+  今天想吃什么？
+</view>
+
+<view class="input-box">
+  例如：20元以内，想吃辣，不想走远
+</view>
+
+<button>
+  🍜 生成推荐
+</button>
+
+</view>
