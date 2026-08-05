@@ -4,16 +4,34 @@
   🤖 小饭AI推荐
 </view>
 
-<view class="chat">
-  今天想吃什么？
-</view>
 
-<view class="input-box">
-  例如：20元以内，想吃辣，不想走远
-</view>
+<scroll-view 
+  class="chat-box"
+  scroll-y="true">
 
-<button>
-  🍜 生成推荐
+  <view 
+    wx:for="{{messages}}"
+    wx:key="index"
+    class="{{item.role}}">
+
+    {{item.content}}
+
+  </view>
+
+</scroll-view>
+
+
+<input
+  class="input-box"
+  placeholder="告诉我：预算、口味、心情都可以"
+  bindinput="inputChange"
+/>
+
+
+<button 
+  bindtap="sendMessage">
+  ✨ AI推荐
 </button>
+
 
 </view>

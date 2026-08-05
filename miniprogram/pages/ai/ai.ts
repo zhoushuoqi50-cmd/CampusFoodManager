@@ -1,66 +1,93 @@
-// pages/ai/ai.ts
 Page({
 
-  /**
-   * 页面的初始数据
-   */
-  data: {
+  data:{
+
+    inputText:"",
+
+    messages:[
+      {
+        role:"ai",
+        content:"👋 今天想吃什么？\n预算、口味、心情都可以告诉我"
+      }
+    ]
 
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad() {
+
+  inputChange(e:any){
+
+    this.setData({
+
+      inputText:e.detail.value
+
+    })
 
   },
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady() {
 
-  },
+  sendMessage(){
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow() {
 
-  },
+    let userText=this.data.inputText
 
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide() {
 
-  },
+    if(!userText){
+      return
+    }
 
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload() {
 
-  },
+    let aiText=""
 
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh() {
 
-  },
+    if(userText.includes("辣")){
 
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
+      aiText=
+      "🌶️ 推荐：辣味菜品\n\n💰 预算：15-20元\n\n⭐ 推荐原因：满足你想吃辣的需求"
 
-  },
+    }
 
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage() {
+    else if(userText.includes("便宜") || userText.includes("20")){
+
+      aiText=
+      "🍚 推荐：经济套餐\n\n💰 预算：10-20元\n\n⭐ 推荐原因：性价比高，适合日常吃"
+
+    }
+
+    else{
+
+      aiText=
+      "🍜 推荐：热汤面类\n\n⭐ 推荐原因：简单快速，适合今天不知道吃什么"
+
+    }
+
+
+    let newMessages=[
+
+      ...this.data.messages,
+
+      {
+        role:"user",
+        content:userText
+      },
+
+      {
+        role:"ai",
+        content:aiText
+      }
+
+    ]
+
+
+    this.setData({
+
+      messages:newMessages,
+
+      inputText:""
+
+    })
+
 
   }
+
+
 })
