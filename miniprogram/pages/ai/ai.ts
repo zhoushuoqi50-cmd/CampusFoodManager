@@ -25,17 +25,64 @@ Page({
   sendMessage(){
 
     let foods = [
-      "🍜 麻辣烫 💰15-20元\n推荐理由：适合想吃辣又想快速解决午饭的同学",
-      "🍚 黄焖鸡米饭 💰16元左右\n推荐理由：份量足，适合下午有课",
-      "🥟 饺子套餐 💰12-18元\n推荐理由：清淡耐吃，不容易踩雷",
-      "🍗 鸡排饭 💰15元左右\n推荐理由：蛋白质丰富，吃完比较有满足感",
-      "🍲 牛肉粉 💰18元左右\n推荐理由：天气冷的时候很舒服"
+      {
+        name:"麻辣香锅",
+        price:18,
+        tags:["辣","重口味","下饭"],
+        reason:"符合你想吃辣的需求，而且价格适中"
+      },
+      {
+        name:"黄焖鸡米饭",
+        price:16,
+        tags:["米饭","饱腹"],
+        reason:"分量足，适合想吃饱的同学"
+      },
+      {
+        name:"鸡排饭",
+        price:15,
+        tags:["米饭","便宜"],
+        reason:"价格实惠，蛋白质丰富"
+      },
+      {
+        name:"饺子套餐",
+        price:12,
+        tags:["便宜","快速"],
+        reason:"价格低，适合赶时间"
+      },
+      {
+        name:"麻辣烫",
+        price:17,
+        tags:["辣","汤类"],
+        reason:"口味丰富，可以自由选择食材"
+      }
     ]
 
 
-    let index = Math.floor(
-      Math.random() * foods.length
-    )
+    let userText=this.data.inputText
+
+
+    let result=foods[0]
+    
+    
+    if(userText.includes("辣")){
+      
+      result=foods.find(
+        item=>item.tags.includes("辣")
+      ) || foods[0]
+    
+    }else if(userText.includes("便宜")){
+    
+      result=foods.find(
+        item=>item.price<=15
+      ) || foods[0]
+    
+    }else{
+    
+      result=foods[
+        Math.floor(Math.random()*foods.length)
+      ]
+    
+    }
 
 
     let userMessage = {
@@ -49,7 +96,14 @@ Page({
       content:
       "✨ 推荐给你：\n\n"
       +
-      foods[index]
+      `✨ 推荐给你：
+      ${result.name}
+      
+      💰价格：
+      ${result.price}元左右
+      
+      原因：
+      ${result.reason}`
     }
 
 
@@ -89,7 +143,8 @@ Page({
       ...this.data.messages,
       {
        role:"ai",
-       content:"🔄 换一个推荐：\n\n"+foods[index]
+       content:"🔄 换一个推荐：\n\n"
+       +foods[index]
       }
     ]
    
