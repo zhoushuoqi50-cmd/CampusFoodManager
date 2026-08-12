@@ -1,13 +1,24 @@
+import { foodData } from '../../utils/foodData'
+
+const getFoodByName = (name: string) => {
+  return foodData.find(food => food.name === name) || foodData[0]
+}
+
 Page({
 
   data: {
-    inputText: "",
-    messages: [
+
+    inputText:"",
+
+    messages:[
+
       {
-        role: "ai",
-        content: "你好，我是小饭AI 🤖\n今天想吃什么？"
+        role:"ai",
+        content:"你好，我是小饭AI 🤖\n今天想吃什么？"
       }
+
     ]
+
   },
 
 
@@ -15,102 +26,86 @@ Page({
   inputChange(e:any){
 
     this.setData({
+
       inputText:e.detail.value
+
     })
 
   },
 
 
-  // AI推荐按钮
+  // AI推荐
   sendMessage(){
-
-    let foods = [
-      {
-        name:"麻辣香锅",
-        price:18,
-        tags:["辣","重口味","下饭"],
-        reason:"符合你想吃辣的需求，而且价格适中"
-      },
-      {
-        name:"黄焖鸡米饭",
-        price:16,
-        tags:["米饭","饱腹"],
-        reason:"分量足，适合想吃饱的同学"
-      },
-      {
-        name:"鸡排饭",
-        price:15,
-        tags:["米饭","便宜"],
-        reason:"价格实惠，蛋白质丰富"
-      },
-      {
-        name:"饺子套餐",
-        price:12,
-        tags:["便宜","快速"],
-        reason:"价格低，适合赶时间"
-      },
-      {
-        name:"麻辣烫",
-        price:17,
-        tags:["辣","汤类"],
-        reason:"口味丰富，可以自由选择食材"
-      }
-    ]
 
 
     let userText=this.data.inputText
 
+    const recommendFoodNames = ["麻辣香锅", "鸡蛋盖饭", "黄焖鸡米饭", "饺子套餐"]
 
-    let result=foods[0]
-    
-    
+    const recommendFoods = recommendFoodNames.map(getFoodByName)
+
+
+    let result=getFoodByName("麻辣香锅")
+
+
+    // 判断用户需求
+
     if(userText.includes("辣")){
-      
-      result=foods.find(
-        item=>item.tags.includes("辣")
-      ) || foods[0]
-    
-    }else if(userText.includes("便宜")){
-    
-      result=foods.find(
-        item=>item.price<=15
-      ) || foods[0]
-    
-    }else{
-    
-      result=foods[
-        Math.floor(Math.random()*foods.length)
-      ]
-    
+
+      result=getFoodByName("麻辣香锅")
+
+    }
+
+    else if(userText.includes("便宜")
+      || userText.includes("省钱")){
+
+      result=getFoodByName("饺子套餐")
+
+    }
+
+    else if(userText.includes("饱")
+      || userText.includes("吃饱")){
+
+      result=getFoodByName("鸡蛋盖饭")
+
+    }
+
+    else if(userText.includes("清淡")){
+
+      result=getFoodByName("饺子套餐")
+
+    }
+
+    else{
+
+      let index=Math.floor(
+        Math.random()*recommendFoods.length
+      )
+
+      result=recommendFoods[index]
+
     }
 
 
-    let userMessage = {
-      role:"user",
-      content:this.data.inputText || "今天吃什么？"
-    }
 
+    let newMessages=[
 
-    let aiMessage = {
-      role:"ai",
-      content:
-      "✨ 推荐给你：\n\n"
-      +
-      `✨ 推荐给你：
-      ${result.name}
-      
-      💰价格：
-      ${result.price}元左右
-      
-      原因：
-      ${result.reason}`
-    }
-
-
-    let newMessages = [
       ...this.data.messages,
-      userMessage,
-      aiMessage
+
+      {
+        role:"user",
+        content:userText
+      },
+
+      {
+        role:"ai",
+        content:
+        `✨ 推荐给你：${result.name}
+💰价格：${result.price}元
+
+原因：${result.reason}`
+      }
+
     ]
 
 
@@ -122,34 +117,63 @@ Page({
 
     })
 
+
   },
+
+
+
+  // 换一个
   changeFood(){
 
-    let foods=[
-    "🍜 麻辣烫",
-    "🍚 黄焖鸡米饭",
-    "🍗 鸡排饭",
-    "🥟 饺子套餐"
-    ]
-   
-    let index=Math.floor(
-      Math.random()*foods.length
-    )
-   
-   
+
+    const changeFoodNames = ["麻辣香锅", "黄焖鸡米饭", "鸡排饭", "饺子套餐"]
+
+    const changeFoods = changeFoodNames.map(getFoodByName)
+
+    let index = 0
+
+let text = this.data.inputText
+
+if(text.includes("辣")){
+ index = 0
+}
+
+else if(text.includes("便宜") || text.includes("省钱")){
+ index = 3
+}
+
+else if(text.includes("吃饱")){
+ index = 2
+}
+
+else{
+ index = Math.floor(Math.random()*changeFoods.length)
+}
+
+
     this.setData({
-   
-    messages:[
-      ...this.data.messages,
-      {
-       role:"ai",
-       content:"🔄 换一个推荐：\n\n"
-       +foods[index]
-      }
-    ]
-   
+
+      messages:[
+
+        ...this.data.messages,
+
+        {
+
+          role:"ai",
+
+          content:
+          `🔄 换一个推荐：
+
+${changeFoods[index].name} ${changeFoods[index].price}元`
+
+        }
+
+      ]
+
     })
-   
-   }
+
+
+  }
+
 
 })
