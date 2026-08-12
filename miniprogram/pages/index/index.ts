@@ -15,6 +15,11 @@ Component({
     canIUseNicknameComp: wx.canIUse('input.type.nickname'),
   },
   methods: {
+    goToAi() {
+      wx.switchTab({
+        url: '/pages/ai/ai',
+      })
+    },
     // 事件处理函数
     bindViewTap() {
       wx.navigateTo({

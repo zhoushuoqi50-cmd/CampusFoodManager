@@ -1,21 +1,29 @@
 .favorite-page {
   min-height: 100vh;
-  padding: 50rpx 30rpx;
+  padding: calc(48rpx + env(safe-area-inset-top)) 28rpx calc(36rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
-  background: #f7f7f7;
+  background: #f6f7f9;
 }
 
 .favorite-title {
-  margin-bottom: 36rpx;
   font-size: 36rpx;
   font-weight: bold;
   text-align: center;
 }
 
-.favorite-empty {
-  padding: 100rpx 30rpx;
-  color: #888888;
+.favorite-subtitle {
+  margin: 10rpx 0 32rpx;
+  color: #999999;
+  font-size: 23rpx;
   text-align: center;
+}
+
+.favorite-empty {
+  margin-top: 70rpx;
+  padding: 80rpx 36rpx;
+  border-radius: 24rpx;
+  text-align: center;
+  background: #ffffff;
 }
 
 .empty-icon {
@@ -23,15 +31,45 @@
   font-size: 72rpx;
 }
 
+.empty-title {
+  color: #333333;
+  font-size: 30rpx;
+  font-weight: bold;
+}
+
+.empty-desc {
+  margin-top: 12rpx;
+  color: #999999;
+  font-size: 24rpx;
+}
+
 .go-ai-button {
-  margin-top: 40rpx;
+  width: 280rpx;
+  height: 76rpx;
+  margin-top: 38rpx;
+  border-radius: 38rpx;
+  color: #ffffff;
+  font-size: 26rpx;
+  line-height: 76rpx;
+  background: #ff6b35;
+}
+
+.go-ai-button::after,
+.remove-button::after {
+  border: 0;
+}
+
+.go-ai-button-active {
+  background: #e85826;
 }
 
 .favorite-card {
   margin-bottom: 24rpx;
   padding: 28rpx;
-  border-radius: 20rpx;
+  border: 1px solid #f0f0f0;
+  border-radius: 22rpx;
   background: #ffffff;
+  box-shadow: 0 5rpx 18rpx rgba(0, 0, 0, 0.035);
 }
 
 .favorite-header,
@@ -41,45 +79,97 @@
   justify-content: space-between;
 }
 
+.favorite-header > view {
+  min-width: 0;
+}
+
 .food-name {
   font-size: 32rpx;
   font-weight: bold;
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
-.food-price {
-  color: #ff6b35;
-  font-weight: bold;
-}
-
-.food-type,
-.food-tags,
-.food-reason,
-.food-requirement {
-  margin-top: 16rpx;
-}
-
-.food-type,
-.food-tags {
-  color: #666666;
-  font-size: 24rpx;
-}
-
-.food-reason,
-.food-requirement {
-  color: #444444;
-  line-height: 1.6;
-}
-
-.favorite-footer {
-  margin-top: 24rpx;
-}
-
-.favorite-time {
+.food-type {
+  margin-top: 6rpx;
   color: #999999;
   font-size: 22rpx;
 }
 
-.remove-button {
-  margin: 0;
+.food-price {
+  margin-left: 16rpx;
+  flex-shrink: 0;
+  color: #ff6b35;
+  font-size: 34rpx;
+  font-weight: bold;
+}
+
+.price-unit {
+  margin-left: 2rpx;
   font-size: 22rpx;
+}
+
+.food-tags {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 18rpx;
+}
+
+.food-tag {
+  margin: 0 10rpx 10rpx 0;
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+  color: #a84c28;
+  font-size: 21rpx;
+  background: #fff1eb;
+}
+
+.food-reason {
+  margin-top: 10rpx;
+  color: #444444;
+  font-size: 26rpx;
+  line-height: 1.65;
+}
+
+.food-requirement {
+  margin-top: 18rpx;
+  padding: 16rpx 18rpx;
+  border-left: 5rpx solid #ffb08f;
+  border-radius: 8rpx;
+  color: #666666;
+  font-size: 23rpx;
+  line-height: 1.55;
+  background: #fafafa;
+}
+
+.requirement-label {
+  color: #999999;
+}
+
+.favorite-footer {
+  margin-top: 22rpx;
+  padding-top: 18rpx;
+  border-top: 1px solid #f2f2f2;
+}
+
+.favorite-time {
+  flex: 1;
+  color: #aaaaaa;
+  font-size: 21rpx;
+}
+
+.remove-button {
+  height: 72rpx;
+  margin: 0 0 0 12rpx;
+  padding: 0 18rpx;
+  flex-shrink: 0;
+  color: #999999;
+  font-size: 21rpx;
+  line-height: 72rpx;
+  background: transparent;
+}
+
+.remove-button-active {
+  color: #d45b45;
+  background: #fff4f1;
 }

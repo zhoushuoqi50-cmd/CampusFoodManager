@@ -1,31 +1,52 @@
 <view class="favorite-page">
   <view class="favorite-title">我的收藏</view>
+  <view class="favorite-subtitle">把心动的菜留在这里，下次少纠结一会儿</view>
 
   <view wx:if="{{favorites.length === 0}}" class="favorite-empty">
     <view class="empty-icon">🍽️</view>
-    <view>还没有收藏的菜，去问问小饭吧～</view>
-    <button class="go-ai-button" bindtap="goToAi">去 AI 推荐</button>
+    <view class="empty-title">还没有收藏的菜</view>
+    <view class="empty-desc">去问问小饭，收藏后下次不用再纠结～</view>
+    <button
+      class="go-ai-button"
+      hover-class="go-ai-button-active"
+      bindtap="goToAi">
+      去 AI 推荐
+    </button>
   </view>
 
-  <view wx:else>
+  <view wx:else class="favorite-list">
     <view
       wx:for="{{favorites}}"
       wx:key="id"
       class="favorite-card">
       <view class="favorite-header">
-        <text class="food-name">{{item.foodName}}</text>
-        <text class="food-price">{{item.price}}元</text>
+        <view>
+          <view class="food-name">{{item.foodName}}</view>
+          <view class="food-type">{{item.type}}</view>
+        </view>
+        <view class="food-price">{{item.price}}<text class="price-unit">元</text></view>
       </view>
-      <view class="food-type">{{item.type}}</view>
-      <view class="food-tags">{{item.tagsText}}</view>
+
+      <view class="food-tags">
+        <text
+          wx:for="{{item.tags}}"
+          wx:for-item="tag"
+          wx:key="*this"
+          class="food-tag">
+          {{tag}}
+        </text>
+      </view>
+
       <view class="food-reason">{{item.reason}}</view>
       <view wx:if="{{item.requirement}}" class="food-requirement">
-        当时需求：{{item.requirement}}
+        <text class="requirement-label">当时想吃：</text>{{item.requirement}}
       </view>
+
       <view class="favorite-footer">
         <text class="favorite-time">收藏于 {{item.timeText}}</text>
         <button
           class="remove-button"
+          hover-class="remove-button-active"
           data-food-name="{{item.foodName}}"
           bindtap="removeFavoriteFood">
           取消收藏

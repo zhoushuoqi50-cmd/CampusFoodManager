@@ -8,6 +8,7 @@ import {
   parseFoodNeeds,
   recommendFood,
 } from '../../utils/foodRecommend'
+import type { FoodRecommendation } from '../../utils/foodRecommend'
 import {
   buildChangeReply,
   buildDislikeReply,
@@ -41,6 +42,13 @@ let messageIdSeed = 0
 
 type ChatRole = 'ai' | 'user'
 
+interface RecommendationCard {
+  price: number
+  type: string
+  tags: string[]
+  reasons: string[]
+}
+
 interface ChatMessage {
   id: string
   role: ChatRole
@@ -49,12 +57,13 @@ interface ChatMessage {
   canFeedback: boolean
   isFavorite: boolean
   requirement: string
+  recommendationCard: RecommendationCard | null
 }
 
 const createMessage = (
   role: ChatRole,
   content: string,
-  options: Partial<Pick<ChatMessage, 'foodName' | 'canFeedback' | 'isFavorite' | 'requirement'>> = {}
+  options: Partial<Pick<ChatMessage, 'foodName' | 'canFeedback' | 'isFavorite' | 'requirement' | 'recommendationCard'>> = {}
 ): ChatMessage => {
   messageIdSeed += 1
   return {
@@ -65,6 +74,26 @@ const createMessage = (
     canFeedback: options.canFeedback || false,
     isFavorite: options.isFavorite || false,
     requirement: options.requirement || '',
+    recommendationCard: options.recommendationCard || null,
+  }
+}
+
+const getPersonaOpening = (reply: string) => {
+  return reply.split('\n\n')[0]
+}
+
+const createRecommendationCard = (
+  recommendation: FoodRecommendation
+): RecommendationCard => {
+  return {
+    price: recommendation.food.price,
+    type: recommendation.food.type,
+    tags: recommendation.food.tags
+      .filter(tag => tag !== recommendation.food.type)
+      .slice(0, 4),
+    reasons: recommendation.reasons.length > 0
+      ? recommendation.reasons.slice(0, 4)
+      : [recommendation.food.reason],
   }
 }
 
@@ -187,6 +216,12 @@ Page({
     inputText: '',
     isLoading: false,
     scrollIntoView: '',
+    quickPrompts: [
+      '20元以内想吃辣',
+      '想吃清淡',
+      '赶时间',
+      '不知道吃什么',
+    ],
     messages: [
       createMessage('ai', buildWelcomeMessage()),
     ] as ChatMessage[],
@@ -269,6 +304,15 @@ Page({
     })
   },
 
+  useQuickPrompt(e: WechatMiniprogram.BaseEvent) {
+    if (this.data.isLoading) return
+
+    const prompt = e.currentTarget.dataset.prompt as string
+    this.setData({ inputText: prompt }, () => {
+      this.sendMessage()
+    })
+  },
+
   sendMessage() {
     if (this.data.isLoading) return
 
@@ -293,11 +337,8 @@ Page({
       inputText: '',
       isLoading: true,
       messages: userMessages,
-      scrollIntoView: userMessages[userMessages.length - 1].id,
-    })
-    wx.showLoading({
-      title: '小饭思考中',
-      mask: true,
+    }, () => {
+      this.setData({ scrollIntoView: 'loading-message' })
     })
 
     setTimeout(() => {
@@ -313,19 +354,20 @@ Page({
       learnFromRequirement(currentNeeds)
       const messages = [
         ...this.data.messages,
-        createMessage('ai', buildRecommendationReply(recommendation, currentNeeds), {
+        createMessage('ai', getPersonaOpening(buildRecommendationReply(recommendation, currentNeeds)), {
           foodName: recommendation.food.name,
           canFeedback: true,
           isFavorite: isFavorite(recommendation.food.name),
           requirement: currentNeeds.rawText,
+          recommendationCard: createRecommendationCard(recommendation),
         }),
       ]
 
-      wx.hideLoading()
       this.setData({
         isLoading: false,
         messages,
-        scrollIntoView: messages[messages.length - 1].id,
+      }, () => {
+        this.setData({ scrollIntoView: messages[messages.length - 1].id })
       })
     }, 300)
   },
@@ -334,10 +376,10 @@ Page({
     if (this.data.isLoading) return
 
     const needs = latestNeeds || parseFoodNeeds('')
-    this.setData({ isLoading: true })
-    wx.showLoading({
-      title: '正在换一道',
-      mask: true,
+    this.setData({
+      isLoading: true,
+    }, () => {
+      this.setData({ scrollIntoView: 'loading-message' })
     })
 
     setTimeout(() => {
@@ -353,19 +395,20 @@ Page({
       saveHistory(recommendation.food.name, recommendation.food.price, needs)
       const messages = [
         ...this.data.messages,
-        createMessage('ai', buildChangeReply(recommendation, needs), {
+        createMessage('ai', getPersonaOpening(buildChangeReply(recommendation, needs)), {
           foodName: recommendation.food.name,
           canFeedback: true,
           isFavorite: isFavorite(recommendation.food.name),
           requirement: needs.rawText,
+          recommendationCard: createRecommendationCard(recommendation),
         }),
       ]
 
-      wx.hideLoading()
       this.setData({
         isLoading: false,
         messages,
-        scrollIntoView: messages[messages.length - 1].id,
+      }, () => {
+        this.setData({ scrollIntoView: messages[messages.length - 1].id })
       })
     }, 300)
   },
@@ -379,7 +422,8 @@ Page({
 
     this.setData({
       messages,
-      scrollIntoView: messages[messages.length - 1].id,
+    }, () => {
+      this.setData({ scrollIntoView: messages[messages.length - 1].id })
     })
   },
 

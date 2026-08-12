@@ -1,12 +1,12 @@
 .profile-page {
   min-height: 100vh;
-  padding: 60rpx 30rpx;
+  padding: calc(48rpx + env(safe-area-inset-top)) 28rpx calc(36rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
-  background: #f7f7f7;
+  background: #f6f7f9;
 }
 
 .profile-title {
-  margin-bottom: 40rpx;
+  margin-bottom: 32rpx;
   font-size: 36rpx;
   font-weight: bold;
   text-align: center;
@@ -14,8 +14,10 @@
 
 .profile-card {
   padding: 30rpx;
-  border-radius: 20rpx;
+  border: 1px solid #f0f0f0;
+  border-radius: 22rpx;
   background: #ffffff;
+  box-shadow: 0 5rpx 18rpx rgba(0, 0, 0, 0.035);
 }
 
 .profile-row {
@@ -34,11 +36,27 @@
 }
 
 .profile-empty {
-  margin-top: 30rpx;
+  margin-top: 32rpx;
+  padding: 30rpx;
+  border-radius: 18rpx;
   color: #999999;
+  line-height: 1.6;
   text-align: center;
+  background: #ffffff;
 }
 
 .clear-button {
   margin-top: 40rpx;
+  border-radius: 38rpx;
+  color: #a85031;
+  font-size: 25rpx;
+  background: #fff0e9;
+}
+
+.clear-button::after {
+  border: 0;
+}
+
+.clear-button:active {
+  opacity: 0.7;
 }

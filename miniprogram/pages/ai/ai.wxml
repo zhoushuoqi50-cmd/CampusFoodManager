@@ -1,76 +1,138 @@
 <view class="container">
+  <view class="title">🤖 小饭AI推荐</view>
 
-<view class="title">
-  🤖 小饭AI推荐
-</view>
+  <scroll-view
+    class="chat-box"
+    scroll-y="true"
+    scroll-with-animation="true"
+    scroll-into-view="{{scrollIntoView}}">
+    <view
+      wx:for="{{messages}}"
+      wx:key="id"
+      id="{{item.id}}"
+      class="message-row {{item.role === 'user' ? 'message-row-user' : 'message-row-ai'}}">
+      <view wx:if="{{item.role === 'ai'}}" class="assistant-mark">饭</view>
 
+      <view class="message-content {{item.role}}">
+        <view class="message-text">{{item.content}}</view>
 
-<scroll-view 
-  class="chat-box"
-  scroll-y="true"
-  scroll-with-animation="true"
-  scroll-into-view="{{scrollIntoView}}">
+        <view wx:if="{{item.recommendationCard}}" class="recommendation-card">
+          <view class="recommendation-header">
+            <view>
+              <view class="recommendation-label">小饭推荐</view>
+              <view class="recommendation-name">{{item.foodName}}</view>
+            </view>
+            <view class="recommendation-price">{{item.recommendationCard.price}}元</view>
+          </view>
 
-  <view 
-    wx:for="{{messages}}"
-    wx:key="id"
-    id="{{item.id}}"
-    class="{{item.role}}">
+          <view class="recommendation-tags">
+            <text class="food-tag">{{item.recommendationCard.type}}</text>
+            <text
+              wx:for="{{item.recommendationCard.tags}}"
+              wx:for-item="tag"
+              wx:key="*this"
+              class="food-tag">
+              {{tag}}
+            </text>
+          </view>
 
-    {{item.content}}
+          <view class="recommendation-reasons">
+            <view
+              wx:for="{{item.recommendationCard.reasons}}"
+              wx:for-item="reason"
+              wx:key="*this"
+              class="reason-item">
+              <text class="reason-check">✓</text>{{reason}}
+            </view>
+          </view>
 
-    <view wx:if="{{item.canFeedback}}" class="feedback-actions">
+          <view wx:if="{{item.canFeedback}}" class="feedback-actions">
+            <button
+              class="feedback-button"
+              hover-class="feedback-button-active"
+              data-food-name="{{item.foodName}}"
+              bindtap="likeRecommendation">
+              👍 喜欢
+            </button>
+            <button
+              class="feedback-button"
+              hover-class="feedback-button-active"
+              data-food-name="{{item.foodName}}"
+              bindtap="dislikeRecommendation">
+              👎 不喜欢
+            </button>
+            <button
+              class="feedback-button favorite-button {{item.isFavorite ? 'favorite-button-selected' : ''}}"
+              hover-class="feedback-button-active"
+              data-food-name="{{item.foodName}}"
+              data-requirement="{{item.requirement}}"
+              bindtap="toggleFavoriteFood">
+              {{item.isFavorite ? '★ 已收藏' : '☆ 收藏'}}
+            </button>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{isLoading}}" id="loading-message" class="message-row message-row-ai loading-row">
+      <view class="assistant-mark">饭</view>
+      <view class="message-content ai loading-bubble">
+        小饭正在帮你挑<text class="loading-dots">...</text>
+      </view>
+    </view>
+
+    <view class="chat-bottom-space"></view>
+  </scroll-view>
+
+  <view class="composer">
+    <scroll-view class="quick-prompts" scroll-x="true" show-scrollbar="false">
+      <view class="quick-prompts-inner">
+        <button
+          wx:for="{{quickPrompts}}"
+          wx:key="*this"
+          class="quick-prompt"
+          hover-class="quick-prompt-active"
+          data-prompt="{{item}}"
+          bindtap="useQuickPrompt">
+          {{item}}
+        </button>
+      </view>
+    </scroll-view>
+
+    <view class="input-row">
+      <input
+        class="input-box"
+        placeholder="告诉小饭预算、口味或心情"
+        value="{{inputText}}"
+        confirm-type="send"
+        cursor-spacing="24"
+        bindinput="inputChange"
+        bindconfirm="sendMessage"
+      />
       <button
-        class="feedback-button"
-        data-food-name="{{item.foodName}}"
-        bindtap="likeRecommendation">
-        👍喜欢
-      </button>
-      <button
-        class="feedback-button"
-        data-food-name="{{item.foodName}}"
-        bindtap="dislikeRecommendation">
-        👎不喜欢
-      </button>
-      <button
-        class="feedback-button"
-        data-food-name="{{item.foodName}}"
-        data-requirement="{{item.requirement}}"
-        bindtap="toggleFavoriteFood">
-        {{item.isFavorite ? '★ 已收藏' : '☆ 收藏'}}
+        class="send-button"
+        hover-class="send-button-active"
+        disabled="{{isLoading}}"
+        bindtap="sendMessage">
+        发送
       </button>
     </view>
 
+    <view class="secondary-actions">
+      <button
+        class="secondary-button"
+        hover-class="secondary-button-active"
+        disabled="{{isLoading}}"
+        bindtap="changeFood">
+        🔄 换一个
+      </button>
+      <button
+        class="secondary-button"
+        hover-class="secondary-button-active"
+        disabled="{{isLoading}}"
+        bindtap="showRecentRecommendations">
+        📋 最近推荐
+      </button>
+    </view>
   </view>
-
-</scroll-view>
-
-
-<input
-  class="input-box"
-  placeholder="告诉我：预算、口味、心情都可以"
-  value="{{inputText}}"
-  bindinput="inputChange"
-/>
-
-
-<button 
-  disabled="{{isLoading}}"
-  bindtap="sendMessage">
-  ✨ AI推荐
-</button>
-
-<button 
- disabled="{{isLoading}}"
- bindtap="changeFood">
- 🔄 换一个
-</button>
-
-<button
- disabled="{{isLoading}}"
- bindtap="showRecentRecommendations">
- 📋 查看最近推荐
-</button>
-
-
 </view>

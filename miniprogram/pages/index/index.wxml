@@ -12,7 +12,7 @@
   今天想吃什么？
 </view>
 
-<button>
+<button bindtap="goToAi">
   🤖 AI帮我决定
 </button>
 
