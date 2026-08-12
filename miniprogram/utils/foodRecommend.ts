@@ -1,4 +1,5 @@
 import type { Food } from './foodData'
+import type { UserPreference } from './userPreference'
 
 export type Taste = '辣' | '不辣' | '清淡' | '甜' | '酸'
 export type Fullness = '饱腹' | '轻量' | '耐饿'
@@ -159,7 +160,11 @@ const matchesScene = (food: Food, scene: Scene) => {
   return sceneTags[scene].some(tag => food.type.includes(tag) || food.tags.includes(tag))
 }
 
-const scoreFood = (food: Food, needs: FoodNeeds): FoodRecommendation => {
+const scoreFood = (
+  food: Food,
+  needs: FoodNeeds,
+  preference?: UserPreference
+): FoodRecommendation => {
   let score = 0
   const reasons: string[] = []
 
@@ -211,24 +216,45 @@ const scoreFood = (food: Food, needs: FoodNeeds): FoodRecommendation => {
     }
   }
 
+  if (preference) {
+    const isLikedFood = preference.likedFoods.some(item => item.foodName === food.name)
+    const isDislikedFood = preference.dislikedFoods.some(item => item.foodName === food.name)
+    const likedTastes = preference.likedTastes.filter(taste => food.tags.includes(taste))
+    const hasDislikedTaste = preference.dislikedTastes.some(taste => food.tags.includes(taste))
+
+    if (isLikedFood) {
+      score += 5
+      reasons.push('是你之前喜欢的菜品')
+    }
+    if (isDislikedFood) score -= 5
+    if (likedTastes.length > 0) {
+      score += 3
+      reasons.push(`符合你喜欢的${likedTastes.join('、')}口味`)
+    }
+    if (hasDislikedTaste) score -= 3
+  }
+
   return { food, score, reasons }
 }
 
 export const recommendFood = (
   foods: Food[],
   needs: FoodNeeds,
-  excludedNames: string[] = []
+  excludedNames: string[] = [],
+  preference?: UserPreference
 ): FoodRecommendation => {
   const availableFoods = foods.filter(food => !excludedNames.includes(food.name))
   const candidates = availableFoods.length > 0 ? availableFoods : foods
-  const recommendations = candidates.map(food => scoreFood(food, needs))
+  const recommendations = candidates.map(food => scoreFood(food, needs, preference))
   const sortedRecommendations = recommendations.sort((left, right) => {
     return right.score - left.score || left.food.price - right.food.price
   })
 
   if (sortedRecommendations[0].score <= 0) {
-    const randomIndex = Math.floor(Math.random() * sortedRecommendations.length)
-    return sortedRecommendations[randomIndex]
+    const highestScore = sortedRecommendations[0].score
+    const highestScoreRecommendations = sortedRecommendations.filter(item => item.score === highestScore)
+    const randomIndex = Math.floor(Math.random() * highestScoreRecommendations.length)
+    return highestScoreRecommendations[randomIndex]
   }
 
   return sortedRecommendations[0]

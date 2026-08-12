@@ -10,6 +10,11 @@ import {
   RecommendationHistory,
   saveRecommendationHistory,
 } from '../../utils/storage'
+import {
+  addDislike,
+  addLike,
+  getPreference,
+} from '../../utils/userPreference'
 
 let latestNeeds: FoodNeeds | null = null
 let recentRecommendedFoods: string[] = []
@@ -105,7 +110,7 @@ Page({
     })
 
     setTimeout(() => {
-      const recommendation = recommendFood(foodData, currentNeeds)
+      const recommendation = recommendFood(foodData, currentNeeds, [], getPreference())
       saveRecommendedFood(recommendation.food.name)
       saveHistory(recommendation.food.name, recommendation.food.price, currentNeeds)
       const messages = [
@@ -113,6 +118,7 @@ Page({
         {
           role: 'ai',
           content: buildRecommendationMessage(recommendation),
+          feedbackFoodName: recommendation.food.name,
         },
       ]
 
@@ -136,7 +142,12 @@ Page({
     })
 
     setTimeout(() => {
-      const recommendation = recommendFood(foodData, needs, recentRecommendedFoods)
+      const recommendation = recommendFood(
+        foodData,
+        needs,
+        recentRecommendedFoods,
+        getPreference()
+      )
       latestNeeds = needs
       saveRecommendedFood(recommendation.food.name)
       saveHistory(recommendation.food.name, recommendation.food.price, needs)
@@ -145,6 +156,7 @@ Page({
         {
           role: 'ai',
           content: buildRecommendationMessage(recommendation, true),
+          feedbackFoodName: recommendation.food.name,
         },
       ]
 
@@ -170,6 +182,31 @@ Page({
     this.setData({
       messages,
       scrollIntoView: `message-${messages.length - 1}`,
+    })
+  },
+
+  likeRecommendation(e: WechatMiniprogram.BaseEvent) {
+    const foodName = e.currentTarget.dataset.foodName as string
+    const food = foodData.find(item => item.name === foodName)
+    if (!food) return
+
+    addLike(food)
+    wx.showToast({
+      title: `已记住你喜欢${food.name}`,
+      icon: 'none',
+    })
+  },
+
+  dislikeRecommendation(e: WechatMiniprogram.BaseEvent) {
+    const foodName = e.currentTarget.dataset.foodName as string
+    const food = foodData.find(item => item.name === foodName)
+    if (!food) return
+
+    addDislike(food)
+    saveRecommendedFood(food.name)
+    wx.showToast({
+      title: `已减少推荐${food.name}`,
+      icon: 'none',
     })
   },
 })

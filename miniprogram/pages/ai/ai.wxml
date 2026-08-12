@@ -19,6 +19,21 @@
 
     {{item.content}}
 
+    <view wx:if="{{item.feedbackFoodName}}" class="feedback-actions">
+      <button
+        class="feedback-button"
+        data-food-name="{{item.feedbackFoodName}}"
+        bindtap="likeRecommendation">
+        👍喜欢
+      </button>
+      <button
+        class="feedback-button"
+        data-food-name="{{item.feedbackFoodName}}"
+        bindtap="dislikeRecommendation">
+        👎不喜欢
+      </button>
+    </view>
+
   </view>
 
 </scroll-view>
