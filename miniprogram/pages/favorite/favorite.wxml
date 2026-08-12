@@ -1,2 +1,36 @@
-<!--pages/favorite/favorite.wxml-->
-<text>pages/favorite/favorite.wxml</text>
+<view class="favorite-page">
+  <view class="favorite-title">我的收藏</view>
+
+  <view wx:if="{{favorites.length === 0}}" class="favorite-empty">
+    <view class="empty-icon">🍽️</view>
+    <view>还没有收藏的菜，去问问小饭吧～</view>
+    <button class="go-ai-button" bindtap="goToAi">去 AI 推荐</button>
+  </view>
+
+  <view wx:else>
+    <view
+      wx:for="{{favorites}}"
+      wx:key="id"
+      class="favorite-card">
+      <view class="favorite-header">
+        <text class="food-name">{{item.foodName}}</text>
+        <text class="food-price">{{item.price}}元</text>
+      </view>
+      <view class="food-type">{{item.type}}</view>
+      <view class="food-tags">{{item.tagsText}}</view>
+      <view class="food-reason">{{item.reason}}</view>
+      <view wx:if="{{item.requirement}}" class="food-requirement">
+        当时需求：{{item.requirement}}
+      </view>
+      <view class="favorite-footer">
+        <text class="favorite-time">收藏于 {{item.timeText}}</text>
+        <button
+          class="remove-button"
+          data-food-name="{{item.foodName}}"
+          bindtap="removeFavoriteFood">
+          取消收藏
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

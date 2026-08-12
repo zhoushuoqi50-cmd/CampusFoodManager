@@ -13,24 +13,31 @@
 
   <view 
     wx:for="{{messages}}"
-    wx:key="index"
-    id="message-{{index}}"
+    wx:key="id"
+    id="{{item.id}}"
     class="{{item.role}}">
 
     {{item.content}}
 
-    <view wx:if="{{item.feedbackFoodName}}" class="feedback-actions">
+    <view wx:if="{{item.canFeedback}}" class="feedback-actions">
       <button
         class="feedback-button"
-        data-food-name="{{item.feedbackFoodName}}"
+        data-food-name="{{item.foodName}}"
         bindtap="likeRecommendation">
         👍喜欢
       </button>
       <button
         class="feedback-button"
-        data-food-name="{{item.feedbackFoodName}}"
+        data-food-name="{{item.foodName}}"
         bindtap="dislikeRecommendation">
         👎不喜欢
+      </button>
+      <button
+        class="feedback-button"
+        data-food-name="{{item.foodName}}"
+        data-requirement="{{item.requirement}}"
+        bindtap="toggleFavoriteFood">
+        {{item.isFavorite ? '★ 已收藏' : '☆ 收藏'}}
       </button>
     </view>
 

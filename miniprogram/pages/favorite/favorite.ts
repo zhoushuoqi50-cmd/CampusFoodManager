@@ -1,66 +1,63 @@
-// pages/favorite/favorite.ts
+import {
+  FavoriteFood,
+  getFavorites,
+  removeFavorite,
+} from '../../utils/favoriteStorage'
+
+interface FavoriteFoodView extends FavoriteFood {
+  tagsText: string
+  timeText: string
+}
+
+const formatFavoriteTime = (favoritedAt: number) => {
+  const date = new Date(favoritedAt)
+  const pad = (value: number) => value.toString().padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+const toFavoriteView = (favorite: FavoriteFood): FavoriteFoodView => ({
+  ...favorite,
+  tagsText: favorite.tags.join(' · '),
+  timeText: formatFavoriteTime(favorite.favoritedAt),
+})
+
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    favorites: [] as FavoriteFoodView[],
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
   onShow() {
-
+    this.loadFavorites()
   },
 
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide() {
-
+  loadFavorites() {
+    const favorites = [...getFavorites()]
+      .reverse()
+      .map(toFavoriteView)
+    this.setData({ favorites })
   },
 
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload() {
+  removeFavoriteFood(e: WechatMiniprogram.BaseEvent) {
+    const foodName = e.currentTarget.dataset.foodName as string
+    wx.showModal({
+      title: '取消收藏',
+      content: `确定不再收藏${foodName}吗？`,
+      success: result => {
+        if (!result.confirm) return
 
+        removeFavorite(foodName)
+        this.loadFavorites()
+        wx.showToast({
+          title: '已取消收藏',
+          icon: 'none',
+        })
+      },
+    })
   },
 
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh() {
-
+  goToAi() {
+    wx.switchTab({
+      url: '/pages/ai/ai',
+    })
   },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage() {
-
-  }
 })

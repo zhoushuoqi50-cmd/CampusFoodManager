@@ -1,10 +1,23 @@
 import { foodData } from '../../utils/foodData'
 import {
-  buildRecommendationMessage,
+  isFavorite,
+  toggleFavorite,
+} from '../../utils/favoriteStorage'
+import {
   FoodNeeds,
   parseFoodNeeds,
   recommendFood,
 } from '../../utils/foodRecommend'
+import {
+  buildChangeReply,
+  buildDislikeReply,
+  buildFavoriteReply,
+  buildHistoryEmptyMessage,
+  buildHistoryTitle,
+  buildLikeReply,
+  buildRecommendationReply,
+  buildWelcomeMessage,
+} from '../../utils/aiPersona'
 import {
   getRecommendationHistory,
   RecommendationHistory,
@@ -24,6 +37,36 @@ import {
 let latestNeeds: FoodNeeds | null = null
 let recentRecommendedFoods: string[] = []
 let isProfileGuideShowing = false
+let messageIdSeed = 0
+
+type ChatRole = 'ai' | 'user'
+
+interface ChatMessage {
+  id: string
+  role: ChatRole
+  content: string
+  foodName: string
+  canFeedback: boolean
+  isFavorite: boolean
+  requirement: string
+}
+
+const createMessage = (
+  role: ChatRole,
+  content: string,
+  options: Partial<Pick<ChatMessage, 'foodName' | 'canFeedback' | 'isFavorite' | 'requirement'>> = {}
+): ChatMessage => {
+  messageIdSeed += 1
+  return {
+    id: `message-${Date.now()}-${messageIdSeed}`,
+    role,
+    content,
+    foodName: options.foodName || '',
+    canFeedback: options.canFeedback || false,
+    isFavorite: options.isFavorite || false,
+    requirement: options.requirement || '',
+  }
+}
 
 const PROFILE_TAGS = ['辣', '不辣', '清淡', '甜', '酸', '重口味', '正常']
 
@@ -126,7 +169,7 @@ const formatHistoryTime = (recommendedAt: number) => {
 
 const buildHistoryMessage = (histories: RecommendationHistory[]) => {
   if (histories.length === 0) {
-    return '还没有推荐记录，先告诉我你想吃什么吧。'
+    return buildHistoryEmptyMessage()
   }
 
   const historyLines = [...histories]
@@ -136,7 +179,7 @@ const buildHistoryMessage = (histories: RecommendationHistory[]) => {
       return `${index + 1}. ${history.foodName} ${history.price}元\n${formatHistoryTime(history.recommendedAt)} · ${requirement}`
     })
 
-  return `📋 最近推荐记录：\n\n${historyLines.join('\n\n')}`
+  return `${buildHistoryTitle()}\n\n${historyLines.join('\n\n')}`
 }
 
 Page({
@@ -145,17 +188,23 @@ Page({
     isLoading: false,
     scrollIntoView: '',
     messages: [
-      {
-        role: 'ai',
-        content: '你好，我是小饭AI 🤖\n今天想吃什么？',
-      },
-    ],
+      createMessage('ai', buildWelcomeMessage()),
+    ] as ChatMessage[],
   },
 
   onShow() {
+    this.syncFavoriteStates()
     if (!getProfile() && !isProfileGuideShowing) {
       this.showProfileGuide()
     }
+  },
+
+  syncFavoriteStates() {
+    const messages = this.data.messages.map(message => ({
+      ...message,
+      isFavorite: message.foodName ? isFavorite(message.foodName) : false,
+    }))
+    this.setData({ messages })
   },
 
   showProfileGuide() {
@@ -237,17 +286,14 @@ Page({
     recentRecommendedFoods = []
     const userMessages = [
       ...this.data.messages,
-      {
-        role: 'user',
-        content: userText,
-      },
+      createMessage('user', userText),
     ]
 
     this.setData({
       inputText: '',
       isLoading: true,
       messages: userMessages,
-      scrollIntoView: `message-${userMessages.length - 1}`,
+      scrollIntoView: userMessages[userMessages.length - 1].id,
     })
     wx.showLoading({
       title: '小饭思考中',
@@ -267,18 +313,19 @@ Page({
       learnFromRequirement(currentNeeds)
       const messages = [
         ...this.data.messages,
-        {
-          role: 'ai',
-          content: buildRecommendationMessage(recommendation),
-          feedbackFoodName: recommendation.food.name,
-        },
+        createMessage('ai', buildRecommendationReply(recommendation, currentNeeds), {
+          foodName: recommendation.food.name,
+          canFeedback: true,
+          isFavorite: isFavorite(recommendation.food.name),
+          requirement: currentNeeds.rawText,
+        }),
       ]
 
       wx.hideLoading()
       this.setData({
         isLoading: false,
         messages,
-        scrollIntoView: `message-${messages.length - 1}`,
+        scrollIntoView: messages[messages.length - 1].id,
       })
     }, 300)
   },
@@ -306,18 +353,19 @@ Page({
       saveHistory(recommendation.food.name, recommendation.food.price, needs)
       const messages = [
         ...this.data.messages,
-        {
-          role: 'ai',
-          content: buildRecommendationMessage(recommendation, true),
-          feedbackFoodName: recommendation.food.name,
-        },
+        createMessage('ai', buildChangeReply(recommendation, needs), {
+          foodName: recommendation.food.name,
+          canFeedback: true,
+          isFavorite: isFavorite(recommendation.food.name),
+          requirement: needs.rawText,
+        }),
       ]
 
       wx.hideLoading()
       this.setData({
         isLoading: false,
         messages,
-        scrollIntoView: `message-${messages.length - 1}`,
+        scrollIntoView: messages[messages.length - 1].id,
       })
     }, 300)
   },
@@ -326,15 +374,12 @@ Page({
     const histories = getRecommendationHistory()
     const messages = [
       ...this.data.messages,
-      {
-        role: 'ai',
-        content: buildHistoryMessage(histories),
-      },
+      createMessage('ai', buildHistoryMessage(histories)),
     ]
 
     this.setData({
       messages,
-      scrollIntoView: `message-${messages.length - 1}`,
+      scrollIntoView: messages[messages.length - 1].id,
     })
   },
 
@@ -346,7 +391,26 @@ Page({
     addLike(food)
     learnFromLikedFood(food.name)
     wx.showToast({
-      title: `已记住你喜欢${food.name}`,
+      title: buildLikeReply(food.name),
+      icon: 'none',
+    })
+  },
+
+  toggleFavoriteFood(e: WechatMiniprogram.BaseEvent) {
+    const foodName = e.currentTarget.dataset.foodName as string
+    const requirement = (e.currentTarget.dataset.requirement as string) || ''
+    const food = foodData.find(item => item.name === foodName)
+    if (!food) return
+
+    const favoriteState = toggleFavorite(food, requirement)
+    const messages = this.data.messages.map(message => {
+      return message.foodName === foodName
+        ? { ...message, isFavorite: favoriteState }
+        : message
+    })
+    this.setData({ messages })
+    wx.showToast({
+      title: buildFavoriteReply(food.name, favoriteState),
       icon: 'none',
     })
   },
@@ -360,7 +424,7 @@ Page({
     learnFromDislikedFood(food.name)
     saveRecommendedFood(food.name)
     wx.showToast({
-      title: `已减少推荐${food.name}`,
+      title: buildDislikeReply(food.name),
       icon: 'none',
     })
   },
