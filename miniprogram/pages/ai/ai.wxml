@@ -44,5 +44,11 @@
  🔄 换一个
 </button>
 
+<button
+ disabled="{{isLoading}}"
+ bindtap="showRecentRecommendations">
+ 📋 查看最近推荐
+</button>
+
 
 </view>

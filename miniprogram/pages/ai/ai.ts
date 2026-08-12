@@ -5,6 +5,11 @@ import {
   parseFoodNeeds,
   recommendFood,
 } from '../../utils/foodRecommend'
+import {
+  getRecommendationHistory,
+  RecommendationHistory,
+  saveRecommendationHistory,
+} from '../../utils/storage'
 
 let latestNeeds: FoodNeeds | null = null
 let recentRecommendedFoods: string[] = []
@@ -14,6 +19,36 @@ const saveRecommendedFood = (foodName: string) => {
     ...recentRecommendedFoods.filter(name => name !== foodName),
     foodName,
   ].slice(-3)
+}
+
+const saveHistory = (foodName: string, price: number, needs: FoodNeeds) => {
+  saveRecommendationHistory({
+    foodName,
+    price,
+    recommendedAt: Date.now(),
+    requirement: needs.rawText,
+  })
+}
+
+const formatHistoryTime = (recommendedAt: number) => {
+  const date = new Date(recommendedAt)
+  const pad = (value: number) => value.toString().padStart(2, '0')
+  return `${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+const buildHistoryMessage = (histories: RecommendationHistory[]) => {
+  if (histories.length === 0) {
+    return '还没有推荐记录，先告诉我你想吃什么吧。'
+  }
+
+  const historyLines = [...histories]
+    .reverse()
+    .map((history, index) => {
+      const requirement = history.requirement || '未指定需求'
+      return `${index + 1}. ${history.foodName} ${history.price}元\n${formatHistoryTime(history.recommendedAt)} · ${requirement}`
+    })
+
+  return `📋 最近推荐记录：\n\n${historyLines.join('\n\n')}`
 }
 
 Page({
@@ -47,7 +82,8 @@ Page({
       return
     }
 
-    latestNeeds = parseFoodNeeds(userText)
+    const currentNeeds = parseFoodNeeds(userText)
+    latestNeeds = currentNeeds
     recentRecommendedFoods = []
     const userMessages = [
       ...this.data.messages,
@@ -69,8 +105,9 @@ Page({
     })
 
     setTimeout(() => {
-      const recommendation = recommendFood(foodData, latestNeeds as FoodNeeds)
+      const recommendation = recommendFood(foodData, currentNeeds)
       saveRecommendedFood(recommendation.food.name)
+      saveHistory(recommendation.food.name, recommendation.food.price, currentNeeds)
       const messages = [
         ...this.data.messages,
         {
@@ -102,6 +139,7 @@ Page({
       const recommendation = recommendFood(foodData, needs, recentRecommendedFoods)
       latestNeeds = needs
       saveRecommendedFood(recommendation.food.name)
+      saveHistory(recommendation.food.name, recommendation.food.price, needs)
       const messages = [
         ...this.data.messages,
         {
@@ -117,5 +155,21 @@ Page({
         scrollIntoView: `message-${messages.length - 1}`,
       })
     }, 300)
+  },
+
+  showRecentRecommendations() {
+    const histories = getRecommendationHistory()
+    const messages = [
+      ...this.data.messages,
+      {
+        role: 'ai',
+        content: buildHistoryMessage(histories),
+      },
+    ]
+
+    this.setData({
+      messages,
+      scrollIntoView: `message-${messages.length - 1}`,
+    })
   },
 })
