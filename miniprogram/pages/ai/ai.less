@@ -1,16 +1,35 @@
+page {
+  height: 100%;
+  overflow: hidden;
+}
+
 .container {
-  height: 100vh;
-  padding-top: calc(32rpx + env(safe-area-inset-top));
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
   background: #f6f7f9;
 }
 
-.title {
+.page-header {
   flex-shrink: 0;
-  padding: 24rpx 30rpx 20rpx;
-  font-size: 34rpx;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+
+.title {
+  height: 44px;
+  padding: 0 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-size: 32rpx;
   font-weight: bold;
   text-align: center;
   background: #ffffff;
@@ -20,13 +39,13 @@
   flex: 1;
   min-height: 0;
   box-sizing: border-box;
-  padding: 24rpx 24rpx 0;
+  padding: 12rpx 24rpx 0;
 }
 
 .message-row {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 24rpx;
+  margin-bottom: 14rpx;
 }
 
 .message-row-user {
@@ -54,7 +73,7 @@
 }
 
 .message-content.ai {
-  padding: 20rpx 22rpx;
+  padding: 12rpx 16rpx;
   border-radius: 8rpx 22rpx 22rpx 22rpx;
   background: #ffffff;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
@@ -73,8 +92,8 @@
 .recommendation-card {
   width: 100%;
   min-width: 460rpx;
-  margin-top: 18rpx;
-  padding-top: 20rpx;
+  margin-top: 8rpx;
+  padding-top: 10rpx;
   border-top: 1px solid #f0f0f0;
   box-sizing: border-box;
 }
@@ -91,12 +110,12 @@
 
 .recommendation-label {
   color: #999999;
-  font-size: 22rpx;
+  font-size: 20rpx;
 }
 
 .recommendation-name {
-  margin-top: 4rpx;
-  font-size: 34rpx;
+  margin-top: 0;
+  font-size: 30rpx;
   font-weight: bold;
   word-break: break-all;
   overflow-wrap: anywhere;
@@ -106,36 +125,37 @@
   margin-left: 14rpx;
   flex-shrink: 0;
   color: #ff6b35;
-  font-size: 30rpx;
+  font-size: 28rpx;
   font-weight: bold;
 }
 
 .recommendation-tags {
   display: flex;
   flex-wrap: wrap;
-  margin-top: 16rpx;
+  margin-top: 6rpx;
 }
 
 .food-tag {
-  margin: 0 10rpx 10rpx 0;
-  padding: 6rpx 14rpx;
+  margin: 0 8rpx 4rpx 0;
+  padding: 3rpx 10rpx;
   border-radius: 999rpx;
   color: #a84c28;
-  font-size: 21rpx;
+  font-size: 20rpx;
   background: #fff1eb;
 }
 
 .recommendation-reasons {
-  margin-top: 8rpx;
-  padding: 16rpx;
+  margin-top: 2rpx;
+  padding: 8rpx 10rpx;
   border-radius: 14rpx;
   color: #555555;
-  font-size: 24rpx;
+  font-size: 22rpx;
+  line-height: 1.4;
   background: #f8f8f8;
 }
 
 .reason-item + .reason-item {
-  margin-top: 8rpx;
+  margin-top: 2rpx;
 }
 
 .reason-check {
@@ -146,7 +166,7 @@
 
 .feedback-actions {
   display: flex;
-  margin-top: 18rpx;
+  margin-top: 8rpx;
 }
 
 .feedback-button {
@@ -184,6 +204,16 @@
   background: #ffe3d6;
 }
 
+.feedback-like-selected {
+  color: #237a50;
+  background: #e5f6ed;
+}
+
+.feedback-dislike-selected {
+  color: #a85031;
+  background: #fff0e9;
+}
+
 .loading-row {
   padding-bottom: 8rpx;
 }
@@ -198,18 +228,21 @@
 }
 
 .chat-bottom-space {
-  height: 20rpx;
+  height: 12rpx;
 }
 
 .composer {
+  width: 100%;
   flex-shrink: 0;
-  padding: 14rpx 20rpx calc(16rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  padding: 8rpx 20rpx calc(10rpx + env(safe-area-inset-bottom));
   border-top: 1px solid #eeeeee;
   background: #ffffff;
 }
 
 .quick-prompts {
   width: 100%;
+  flex-shrink: 0;
   white-space: nowrap;
 }
 
@@ -218,13 +251,13 @@
 }
 
 .quick-prompt {
-  height: 54rpx;
-  margin: 0 12rpx 12rpx 0;
-  padding: 0 18rpx;
+  height: 48rpx;
+  margin: 0 10rpx 6rpx 0;
+  padding: 0 16rpx;
   border-radius: 999rpx;
   color: #666666;
-  font-size: 22rpx;
-  line-height: 54rpx;
+  font-size: 21rpx;
+  line-height: 48rpx;
   background: #f4f4f4;
 }
 
@@ -235,27 +268,32 @@
 }
 
 .input-row {
+  width: 100%;
+  min-width: 0;
   display: flex;
   align-items: center;
 }
 
 .input-box {
-  height: 72rpx;
+  height: 68rpx;
+  min-width: 0;
   padding: 0 24rpx;
   flex: 1;
-  border-radius: 36rpx;
+  box-sizing: border-box;
+  border-radius: 34rpx;
   background: #f4f5f6;
 }
 
 .send-button {
   width: 120rpx;
-  height: 72rpx;
+  height: 68rpx;
   margin: 0 0 0 14rpx;
   padding: 0;
-  border-radius: 36rpx;
+  flex-shrink: 0;
+  border-radius: 34rpx;
   color: #ffffff;
   font-size: 25rpx;
-  line-height: 72rpx;
+  line-height: 68rpx;
   background: #ff6b35;
 }
 
@@ -269,19 +307,22 @@
 }
 
 .secondary-actions {
+  width: 100%;
+  min-width: 0;
   display: flex;
-  margin-top: 12rpx;
+  margin-top: 8rpx;
 }
 
 .secondary-button {
-  height: 56rpx;
+  min-width: 0;
+  height: 52rpx;
   margin: 0 12rpx 0 0;
   padding: 0;
   flex: 1;
   border-radius: 16rpx;
   color: #777777;
   font-size: 22rpx;
-  line-height: 56rpx;
+  line-height: 52rpx;
   background: #ffffff;
 }
 

@@ -1,5 +1,7 @@
 <view class="container">
-  <view class="title">🤖 小饭AI推荐</view>
+  <view class="page-header" style="padding-top: {{statusBarHeight}}px;">
+    <view class="title">🤖 小饭AI推荐</view>
+  </view>
 
   <scroll-view
     class="chat-box"
@@ -27,13 +29,13 @@
 
           <view class="recommendation-tags">
             <text class="food-tag">{{item.recommendationCard.type}}</text>
-            <text
+            <block
               wx:for="{{item.recommendationCard.tags}}"
               wx:for-item="tag"
-              wx:key="*this"
-              class="food-tag">
-              {{tag}}
-            </text>
+              wx:for-index="tagIndex"
+              wx:key="*this">
+              <text wx:if="{{tagIndex < 2}}" class="food-tag">{{tag}}</text>
+            </block>
           </view>
 
           <view class="recommendation-reasons">
@@ -48,16 +50,18 @@
 
           <view wx:if="{{item.canFeedback}}" class="feedback-actions">
             <button
-              class="feedback-button"
+              class="feedback-button {{item.feedbackState === 'liked' ? 'feedback-like-selected' : ''}}"
               hover-class="feedback-button-active"
               data-food-name="{{item.foodName}}"
+              data-message-id="{{item.id}}"
               bindtap="likeRecommendation">
               👍 喜欢
             </button>
             <button
-              class="feedback-button"
+              class="feedback-button {{item.feedbackState === 'disliked' ? 'feedback-dislike-selected' : ''}}"
               hover-class="feedback-button-active"
               data-food-name="{{item.foodName}}"
+              data-message-id="{{item.id}}"
               bindtap="dislikeRecommendation">
               👎 不喜欢
             </button>

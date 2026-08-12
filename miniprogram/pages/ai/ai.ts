@@ -41,6 +41,7 @@ let isProfileGuideShowing = false
 let messageIdSeed = 0
 
 type ChatRole = 'ai' | 'user'
+type FeedbackState = '' | 'liked' | 'disliked'
 
 interface RecommendationCard {
   price: number
@@ -56,6 +57,7 @@ interface ChatMessage {
   foodName: string
   canFeedback: boolean
   isFavorite: boolean
+  feedbackState: FeedbackState
   requirement: string
   recommendationCard: RecommendationCard | null
 }
@@ -63,7 +65,7 @@ interface ChatMessage {
 const createMessage = (
   role: ChatRole,
   content: string,
-  options: Partial<Pick<ChatMessage, 'foodName' | 'canFeedback' | 'isFavorite' | 'requirement' | 'recommendationCard'>> = {}
+  options: Partial<Pick<ChatMessage, 'foodName' | 'canFeedback' | 'isFavorite' | 'feedbackState' | 'requirement' | 'recommendationCard'>> = {}
 ): ChatMessage => {
   messageIdSeed += 1
   return {
@@ -73,6 +75,7 @@ const createMessage = (
     foodName: options.foodName || '',
     canFeedback: options.canFeedback || false,
     isFavorite: options.isFavorite || false,
+    feedbackState: options.feedbackState || '',
     requirement: options.requirement || '',
     recommendationCard: options.recommendationCard || null,
   }
@@ -213,6 +216,7 @@ const buildHistoryMessage = (histories: RecommendationHistory[]) => {
 
 Page({
   data: {
+    statusBarHeight: 24,
     inputText: '',
     isLoading: false,
     scrollIntoView: '',
@@ -225,6 +229,18 @@ Page({
     messages: [
       createMessage('ai', buildWelcomeMessage()),
     ] as ChatMessage[],
+  },
+
+  onLoad() {
+    const systemInfo = wx.getSystemInfoSync()
+    const safeAreaTop = systemInfo.safeArea ? systemInfo.safeArea.top : 0
+    const statusBarHeight = Math.max(
+      systemInfo.statusBarHeight || 0,
+      safeAreaTop,
+      20
+    )
+
+    this.setData({ statusBarHeight })
   },
 
   onShow() {
@@ -299,9 +315,15 @@ Page({
   },
 
   inputChange(e: WechatMiniprogram.Input) {
+    if (this.data.isLoading) {
+      return ''
+    }
+
     this.setData({
       inputText: e.detail.value,
     })
+
+    return e.detail.value
   },
 
   useQuickPrompt(e: WechatMiniprogram.BaseEvent) {
@@ -429,11 +451,18 @@ Page({
 
   likeRecommendation(e: WechatMiniprogram.BaseEvent) {
     const foodName = e.currentTarget.dataset.foodName as string
+    const messageId = e.currentTarget.dataset.messageId as string
     const food = foodData.find(item => item.name === foodName)
     if (!food) return
 
     addLike(food)
     learnFromLikedFood(food.name)
+    const messages = this.data.messages.map(message => (
+      message.id === messageId
+        ? { ...message, feedbackState: 'liked' as FeedbackState }
+        : message
+    ))
+    this.setData({ messages })
     wx.showToast({
       title: buildLikeReply(food.name),
       icon: 'none',
@@ -461,12 +490,19 @@ Page({
 
   dislikeRecommendation(e: WechatMiniprogram.BaseEvent) {
     const foodName = e.currentTarget.dataset.foodName as string
+    const messageId = e.currentTarget.dataset.messageId as string
     const food = foodData.find(item => item.name === foodName)
     if (!food) return
 
     addDislike(food)
     learnFromDislikedFood(food.name)
     saveRecommendedFood(food.name)
+    const messages = this.data.messages.map(message => (
+      message.id === messageId
+        ? { ...message, feedbackState: 'disliked' as FeedbackState }
+        : message
+    ))
+    this.setData({ messages })
     wx.showToast({
       title: buildDislikeReply(food.name),
       icon: 'none',
