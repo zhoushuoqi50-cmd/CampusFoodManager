@@ -1,5 +1,6 @@
 import type { Food } from './foodData'
 import type { UserPreference } from './userPreference'
+import type { UserProfile } from './userProfile'
 
 export type Taste = '辣' | '不辣' | '清淡' | '甜' | '酸'
 export type Fullness = '饱腹' | '轻量' | '耐饿'
@@ -160,10 +161,23 @@ const matchesScene = (food: Food, scene: Scene) => {
   return sceneTags[scene].some(tag => food.type.includes(tag) || food.tags.includes(tag))
 }
 
+const matchesProfileType = (food: Food, profileType: string) => {
+  const typeAliases: Record<string, string[]> = {
+    米饭: ['米饭', '盖饭'],
+    面食: ['面', '面食'],
+    汤类: ['汤'],
+    小吃: ['小吃'],
+    热菜: ['热食', '香锅'],
+  }
+  const aliases = typeAliases[profileType] || [profileType]
+  return aliases.some(alias => food.type.includes(alias) || food.tags.includes(alias))
+}
+
 const scoreFood = (
   food: Food,
   needs: FoodNeeds,
-  preference?: UserPreference
+  preference?: UserPreference,
+  profile?: UserProfile | null
 ): FoodRecommendation => {
   let score = 0
   const reasons: string[] = []
@@ -234,6 +248,31 @@ const scoreFood = (
     if (hasDislikedTaste) score -= 3
   }
 
+  if (profile) {
+    const matchedTypes = profile.favoriteTypes.filter(type => matchesProfileType(food, type))
+    const matchedTags = profile.favoriteTags.filter(tag => food.tags.includes(tag))
+    const hasDislikedTag = profile.dislikedTags.some(tag => food.tags.includes(tag))
+
+    if (matchedTypes.length > 0) {
+      score += 4
+      reasons.push(`符合你的${matchedTypes.join('、')}类型偏好`)
+    }
+    if (matchedTags.length > 0) {
+      score += 3
+      reasons.push(`符合画像中的${matchedTags.join('、')}口味`)
+    }
+    if (hasDislikedTag) score -= 5
+
+    if (profile.budgetPreference !== null) {
+      if (food.price <= profile.budgetPreference) {
+        score += 3
+        reasons.push(`符合你平时${profile.budgetPreference}元的预算习惯`)
+      } else {
+        score -= 3
+      }
+    }
+  }
+
   return { food, score, reasons }
 }
 
@@ -241,11 +280,12 @@ export const recommendFood = (
   foods: Food[],
   needs: FoodNeeds,
   excludedNames: string[] = [],
-  preference?: UserPreference
+  preference?: UserPreference,
+  profile?: UserProfile | null
 ): FoodRecommendation => {
   const availableFoods = foods.filter(food => !excludedNames.includes(food.name))
   const candidates = availableFoods.length > 0 ? availableFoods : foods
-  const recommendations = candidates.map(food => scoreFood(food, needs, preference))
+  const recommendations = candidates.map(food => scoreFood(food, needs, preference, profile))
   const sortedRecommendations = recommendations.sort((left, right) => {
     return right.score - left.score || left.food.price - right.food.price
   })

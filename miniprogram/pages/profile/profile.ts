@@ -1,66 +1,50 @@
-// pages/profile/profile.ts
+import { getRecommendationHistory } from '../../utils/storage'
+import { clearProfile, getProfile } from '../../utils/userProfile'
+
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    hasProfile: false,
+    budgetPreference: '未设置',
+    favoriteTypes: '未设置',
+    favoriteTags: '未设置',
+    recommendationCount: 0,
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
   onShow() {
-
+    this.loadProfile()
   },
 
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide() {
-
+  loadProfile() {
+    const profile = getProfile()
+    this.setData({
+      hasProfile: Boolean(profile),
+      budgetPreference: profile && profile.budgetPreference !== null
+        ? `${profile.budgetPreference}元左右`
+        : '未设置',
+      favoriteTypes: profile && profile.favoriteTypes.length > 0
+        ? profile.favoriteTypes.join('、')
+        : '未设置',
+      favoriteTags: profile && profile.favoriteTags.length > 0
+        ? profile.favoriteTags.join('、')
+        : '未设置',
+      recommendationCount: getRecommendationHistory().length,
+    })
   },
 
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload() {
+  clearDietProfile() {
+    wx.showModal({
+      title: '清除饮食画像',
+      content: '清除后，AI推荐将恢复默认状态。',
+      success: result => {
+        if (!result.confirm) return
 
+        clearProfile()
+        this.loadProfile()
+        wx.showToast({
+          title: '画像已清除',
+          icon: 'success',
+        })
+      },
+    })
   },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh() {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage() {
-
-  }
 })

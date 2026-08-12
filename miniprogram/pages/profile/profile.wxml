@@ -1,2 +1,33 @@
-<!--pages/profile/profile.wxml-->
-<text>pages/profile/profile.wxml</text>
+<view class="profile-page">
+  <view class="profile-title">我的饮食画像</view>
+
+  <view class="profile-card">
+    <view class="profile-row">
+      <text class="profile-label">预算偏好</text>
+      <text>{{budgetPreference}}</text>
+    </view>
+    <view class="profile-row">
+      <text class="profile-label">喜欢口味</text>
+      <text>{{favoriteTags}}</text>
+    </view>
+    <view class="profile-row">
+      <text class="profile-label">喜欢类型</text>
+      <text>{{favoriteTypes}}</text>
+    </view>
+    <view class="profile-row">
+      <text class="profile-label">推荐次数</text>
+      <text>{{recommendationCount}}次</text>
+    </view>
+  </view>
+
+  <view wx:if="{{!hasProfile}}" class="profile-empty">
+    还没有饮食画像，前往 AI 推荐完成首次设置吧。
+  </view>
+
+  <button
+    wx:if="{{hasProfile}}"
+    class="clear-button"
+    bindtap="clearDietProfile">
+    清除画像
+  </button>
+</view>
